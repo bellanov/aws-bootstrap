@@ -8,7 +8,9 @@ USER_NAME="${USER_NAME:-my-service-account}"
 echo "Deleting resources for group: $GROUP_NAME and user: $USER_NAME..."
 
 # Detach policies from the group
-POLICIES=$(aws iam list-attached-group-policies --group-name "$GROUP_NAME" --query 'AttachedPolicies[].PolicyArn' --output text --profile admin)
+POLICIES=$(aws iam list-attached-group-policies --group-name "$GROUP_NAME" \
+  --query 'AttachedPolicies[].PolicyArn' --output text --profile admin)
+
 for POLICY_ARN in $POLICIES; do
   echo "Detaching policy $POLICY_ARN from group $GROUP_NAME..."
   aws iam detach-group-policy --group-name "$GROUP_NAME" --policy-arn "$POLICY_ARN" --profile admin
