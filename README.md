@@ -1,2 +1,3 @@
 # aws-bootstrap
-Bootstrap development in Amazon Web Services.
+
+Bootstrap development in *Amazon Web Services*.
