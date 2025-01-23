@@ -76,7 +76,6 @@ else
   err "Error: Failed to create user $SERVICE_ACCOUNT"
 fi
 
-
 # Create the Terraform user group
 echo "Creating IAM user group: $GROUP_NAME"
 

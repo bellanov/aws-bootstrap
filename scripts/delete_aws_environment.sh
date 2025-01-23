@@ -61,14 +61,23 @@ POLICIES=$(aws iam list-attached-group-policies --group-name "$GROUP_NAME" --que
 
 for POLICY_ARN in $POLICIES; do
   echo "Detaching policy ( $POLICY_ARN ) from group ( $GROUP_NAME )"
-  aws iam detach-group-policy --group-name "$GROUP_NAME" --policy-arn "$POLICY_ARN" --profile "$profile"
-done
 
-# An error occurred (NoSuchEntity) when calling the ListAttachedGroupPolicies operation: The group with name terraform cannot be found.
+  if aws iam detach-group-policy --group-name "$GROUP_NAME" --policy-arn "$POLICY_ARN" \
+    --profile "$profile" >/dev/null 2>&1; then
+    echo "Successfully detached policy: $POLICY_ARN"
+  else
+    err "Error: Failed to create user $SERVICE_ACCOUNT"
+  fi
+done
 
 # Remove the Terraform user from the group
 echo "Removing user ( $SERVICE_ACCOUNT ) from group ( $GROUP_NAME )"
-aws iam remove-user-from-group --group-name "$GROUP_NAME" --user-name "$SERVICE_ACCOUNT" --profile "$profile"
+if aws iam remove-user-from-group --group-name "$GROUP_NAME" --user-name "$SERVICE_ACCOUNT" \
+  --profile "$profile" >/dev/null 2>&1; then
+  echo "Successfully removed user: $SERVICE_ACCOUNT"
+else
+  err "Error: Failed to remove user: $SERVICE_ACCOUNT"
+fi
 
 # Delete Terraform user access keys
 echo "Deleting user access keys: $SERVICE_ACCOUNT"
@@ -76,16 +85,31 @@ ACCESS_KEYS=$(aws iam list-access-keys --user-name "$SERVICE_ACCOUNT" --query 'A
 
 for ACCESS_KEY in $ACCESS_KEYS; do
   echo "Deleting access key: $ACCESS_KEY"
-  aws iam delete-access-key --user-name "$SERVICE_ACCOUNT" --access-key-id "$ACCESS_KEY" --profile "$profile"
+  if aws iam delete-access-key --user-name "$SERVICE_ACCOUNT" --access-key-id "$ACCESS_KEY" \
+    --profile "$profile" >/dev/null 2>&1; then
+    echo "Successfully deleted access key: $ACCESS_KEY"
+  else
+    err "Error: Failed to delete access key: $ACCESS_KEY"
+  fi
 done
 
 # Delete the Terraform user
 echo "Deleting IAM user: $SERVICE_ACCOUNT"
-aws iam delete-user --user-name "$SERVICE_ACCOUNT" --profile "$profile"
+
+if aws iam delete-user --user-name "$SERVICE_ACCOUNT" --profile "$profile"  >/dev/null 2>&1; then
+  echo "Successfully deleted user: $SERVICE_ACCOUNT"
+else
+  err "Error: Failed to delete user: $SERVICE_ACCOUNT"
+fi
 
 # Delete the Terraform user group
 echo "Deleting IAM group: $GROUP_NAME"
-aws iam delete-group --group-name "$GROUP_NAME" --profile "$profile"
+
+if aws iam delete-group --group-name "$GROUP_NAME" --profile "$profile" >/dev/null 2>&1; then
+  echo "Successfully deleted IAM group: $GROUP_NAME"
+else
+  err "Error: Failed to IAM group: $GROUP_NAME"
+fi
 
 # Project Deletion Complete
 echo "Environment deletion complete!!!"
