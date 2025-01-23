@@ -73,9 +73,8 @@ echo "Creating IAM User: $SERVICE_ACCOUNT"
 if aws iam create-user --user-name "$SERVICE_ACCOUNT" --profile "$profile" >/dev/null 2>&1; then
   echo "Successfully created user: $SERVICE_ACCOUNT"
 else
-  err "Error: Failed to create user $SERVICE_ACCOUNT" >&2
+  err "Error: Failed to create user $SERVICE_ACCOUNT"
 fi
-
 
 # Create the Terraform user group
 echo "Creating IAM user group: $GROUP_NAME"
@@ -83,7 +82,7 @@ echo "Creating IAM user group: $GROUP_NAME"
 if aws iam create-group --group-name "$GROUP_NAME" --profile "$profile" >/dev/null 2>&1; then
   echo "Successfully created group: $GROUP_NAME"
 else
-  err "Error: Failed to create group $GROUP_NAME." >&2
+  err "Error: Failed to create group $GROUP_NAME."
 fi
 
 # Add the user to the group
@@ -92,7 +91,7 @@ echo "Adding user to group: $SERVICE_ACCOUNT => $GROUP_NAME"
 if aws iam add-user-to-group --group-name "$GROUP_NAME" --user-name "$SERVICE_ACCOUNT" --profile "$profile" >/dev/null 2>&1; then
   echo "User $SERVICE_ACCOUNT successfully added to group: $GROUP_NAME"
 else
-  err "Error: Failed to add user $SERVICE_ACCOUNT to group: $GROUP_NAME" >&2
+  err "Error: Failed to add user $SERVICE_ACCOUNT to group: $GROUP_NAME"
 fi
 
 # Attach IAM policies to the group
@@ -102,7 +101,7 @@ for POLICY_ARN in $POLICY_ARNS; do
   if aws iam attach-group-policy --group-name "$GROUP_NAME" --policy-arn "$POLICY_ARN" --profile "$profile" >/dev/null 2>&1; then
     echo "Policy ( $POLICY_ARN ) attached to group: $GROUP_NAME"
   else
-    err "Error: Failed to attach policy $POLICY_ARN to group $GROUP_NAME." >&2
+    err "Error: Failed to attach policy $POLICY_ARN to group $GROUP_NAME."
   fi
 done
 
